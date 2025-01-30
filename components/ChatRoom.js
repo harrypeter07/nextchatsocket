@@ -8,12 +8,18 @@ export default function ChatRoom() {
 
   useEffect(() => {
     fetchMessages();
-    socketRef.current = io('', {
+
+    socketRef.current = io('http://localhost:3000', {  // Change to your backend URL
       path: '/api/socket',
       auth: { token: localStorage.getItem('token') },
     });
 
+    socketRef.current.on('connect', () => {
+      console.log('Connected to WebSocket');
+    });
+
     socketRef.current.on('message', (message) => {
+      console.log('New message received:', message);
       setMessages((prevMessages) => [...prevMessages, message]);
     });
 
@@ -42,7 +48,12 @@ export default function ChatRoom() {
         body: JSON.stringify({ content: input }),
       });
       const newMessage = await res.json();
+
+      // Emit message to WebSocket server
       socketRef.current.emit('message', newMessage);
+      
+      // Update UI immediately
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
       setInput('');
     }
   };
@@ -52,7 +63,7 @@ export default function ChatRoom() {
       <div>
         {messages.map((message) => (
           <div key={message._id}>
-            <strong>{message.sender.username}: </strong>
+            <strong>{message.sender?.username}: </strong>
             {message.content}
           </div>
         ))}
@@ -63,6 +74,7 @@ export default function ChatRoom() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
+          required
         />
         <button type="submit">Send</button>
       </form>
