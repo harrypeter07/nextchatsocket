@@ -13,7 +13,7 @@ export default function Chat() {
     } else {
       setIsAuthenticated(true);
     }
-  }, []);
+  }, [router]);
 
   if (!isAuthenticated) {
     return <div>Loading...</div>;
