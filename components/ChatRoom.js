@@ -9,7 +9,7 @@ export default function ChatRoom() {
   useEffect(() => {
     fetchMessages();
 
-    socketRef.current = io('http://localhost:3000', {  // Change to your backend URL
+    socketRef.current = io('https://nextchatsocket-iop6.vercel.app/', {  // Change to your backend URL
       path: '/api/socket',
       auth: { token: localStorage.getItem('token') },
     });
