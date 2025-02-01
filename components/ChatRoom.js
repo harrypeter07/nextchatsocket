@@ -81,23 +81,32 @@ export default function ChatRoom() {
     }
   };
 
+ 
+ 
+ 
+
+ 
+ 
+ //updated
+ 
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-
+  
     try {
       const token = localStorage.getItem('token');
+      const username = localStorage.getItem('username'); // Get username from localStorage
       const res = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ content: input }),
+        body: JSON.stringify({ content: input, sender: { username } }), // Include sender info
       });
-
+  
       if (!res.ok) {
         if (res.status === 401) router.push('/');
         throw new Error('Failed to send message');
       }
-
+  
       const newMessage = await res.json();
       socketRef.current.emit('message', newMessage);
       setMessages((prevMessages) => [...prevMessages, newMessage]);
@@ -106,6 +115,23 @@ export default function ChatRoom() {
       console.error('Error sending message:', error);
     }
   };
+  
+ 
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
 
   const handleLogout = () => {
     socketRef.current?.disconnect();
