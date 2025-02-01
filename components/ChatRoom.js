@@ -36,15 +36,15 @@ const [refreshKey, setRefreshKey] = useState(0);
   };
   
   // Now useEffect will have access to fetchMessages
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchMessages();
-      console.log('Refreshed');
-    }, 1000); // 1 second interval
-  
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
-  
+  // useEffect(() => {
+    // const interval = setInterval(() => {
+      // fetchMessages();
+      // console.log('Refreshed');
+    // }, 1000); // 1 second interval
+  // 
+    // return () => clearInterval(interval); // Cleanup on unmount
+  // }, []);
+  // 
   
 
    
@@ -131,7 +131,8 @@ const [refreshKey, setRefreshKey] = useState(0);
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-  
+    
+     fetchMessages();
     try {
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username'); // Get username from localStorage
@@ -190,15 +191,24 @@ const [refreshKey, setRefreshKey] = useState(0);
           >
             <p className="text-black font-bold text-sm">{message.sender?.username || 'Unknown'}</p>
             <p className='text-slate-600'>{message.content}</p>
-            <p className="text-teal-600 text-xs text-right mt-1 opacity-70">
-              {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ''}
-            </p>
+           
+            <p className="text-black text-xs text-right mt-1 opacity-70">
+  {message.timestamp
+    ? new Date(message.timestamp).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true, // Change to false if you want 24-hour format
+      })
+    : ''}
+</p>
+
+           
           </div>
         ))}
-        <div ref={messagesEndRef} />
+        <div className="h-12" ref={messagesEndRef} />
       </div>
-      <form onSubmit={sendMessage} className="bg-white p-4 border-t">
-        <div className="flex gap-2">
+      <form onSubmit={sendMessage} className="fixed w-full bottom-0 bg-white p-4 border-t">
+        <div className="flex gap-2 text-black">
           <input
             type="text"
             value={input}
@@ -207,7 +217,7 @@ const [refreshKey, setRefreshKey] = useState(0);
             className="flex-grow px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-          <button type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+          <button  type="submit" className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
             Send
           </button>
         </div>
