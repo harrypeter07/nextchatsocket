@@ -91,9 +91,9 @@ const [refreshKey, setRefreshKey] = useState(0);
     return () => socketRef.current.disconnect();
   }, [router ]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // useEffect(() => {
+    // scrollToBottom();
+  // }, [messages]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
