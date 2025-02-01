@@ -36,15 +36,15 @@ const [refreshKey, setRefreshKey] = useState(0);
   };
   
   // Now useEffect will have access to fetchMessages
-  // useEffect(() => {
-    // const interval = setInterval(() => {
-      // fetchMessages();
-      // console.log('Refreshed');
-    // }, 1000); // 1 second interval
-  // 
-    // return () => clearInterval(interval); // Cleanup on unmount
-  // }, []);
-  // 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchMessages();
+      console.log('Refreshed');
+    }, 1000); // 1 second interval
+  
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, []);
+  
   
 
    
@@ -132,7 +132,7 @@ const [refreshKey, setRefreshKey] = useState(0);
     e.preventDefault();
     if (!input.trim()) return;
     
-     fetchMessages();
+    //  fetchMessages();
     try {
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username'); // Get username from localStorage
