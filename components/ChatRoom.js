@@ -13,6 +13,29 @@ const [refreshKey, setRefreshKey] = useState(0);
 
 
   //for relaoding the comopnent
+
+  
+  
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/messages', {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+  
+      if (!res.ok) {
+        if (res.status === 401) router.push('/');
+        throw new Error('Failed to fetch messages');
+      }
+  
+      const data = await res.json();
+      if (Array.isArray(data)) setMessages(data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+  
+  // Now useEffect will have access to fetchMessages
   useEffect(() => {
     const interval = setInterval(() => {
       fetchMessages();
@@ -20,7 +43,12 @@ const [refreshKey, setRefreshKey] = useState(0);
     }, 1000); // 1 second interval
   
     return () => clearInterval(interval); // Cleanup on unmount
-  }, [fetchMessages, refreshKey]);
+  }, []);
+  
+  
+
+   
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
@@ -73,24 +101,24 @@ const [refreshKey, setRefreshKey] = useState(0);
     }, 100);
   };
 
-  const fetchMessages = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/messages', {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
+  // const fetchMessages = async () => {
+    // try {
+      // const token = localStorage.getItem('token');
+      // const res = await fetch('/api/messages', {
+        // headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      // });
 
-      if (!res.ok) {
-        if (res.status === 401) router.push('/');
-        throw new Error('Failed to fetch messages');
-      }
+      // if (!res.ok) {
+        // if (res.status === 401) router.push('/');
+        // throw new Error('Failed to fetch messages');
+      // }
 
-      const data = await res.json();
-      if (Array.isArray(data)) setMessages(data);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
+      // const data = await res.json();
+      // if (Array.isArray(data)) setMessages(data);
+    // } catch (error) {
+      // console.error('Error fetching messages:', error);
+    // }
+  // };
 
  
  
