@@ -6,10 +6,21 @@
 //   const [messages, setMessages] = useState([]);
 //   const [input, setInput] = useState('');
 //   const [user, setUser] = useState(null);
+
 //   const socketRef = useRef(null);
 //   const messagesEndRef = useRef(null);
 //   const router = useRouter();
 
+
+//   //for relaoding the comopnent
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setRefreshKey((prevKey) => prevKey + 1);
+//       console.log('Refreshed');
+//     }, 55000); // 1 second interval
+  
+//     return () => clearInterval(interval); // Cleanup on unmount
+//   }, []);
 //   useEffect(() => {
 //     const token = localStorage.getItem('token');
 //     const username = localStorage.getItem('username');
@@ -50,7 +61,7 @@
 //     socketRef.current.on('error', (error) => console.error('Socket error:', error));
 
 //     return () => socketRef.current.disconnect();
-//   }, [router , fetchMessages ]);
+//   }, [router ]);
 
 //   useEffect(() => {
 //     scrollToBottom();
@@ -143,7 +154,7 @@
 //   if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
 //   return (
-//     <div className="min-h-screen flex flex-col bg-gray-100">
+//     <div  className="min-h-screen flex flex-col bg-gray-100">
 //       <div className="bg-white shadow-md p-4 flex justify-between items-center">
 //         <h1 className="text-2xl font-bold">Chat Room</h1>
 //         <div className="flex items-center gap-4">
@@ -193,7 +204,6 @@
 // }
 
 
-
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import io from 'socket.io-client';
@@ -202,29 +212,21 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [user, setUser] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const router = useRouter();
 
-  // ✅ Move fetchMessages BEFORE useEffect
-  const fetchMessages = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch('/api/messages', {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      });
+  // Auto-reload chat every 55 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshKey((prevKey) => prevKey + 1);
+      console.log('Refreshed');
+    }, 1000); // 55 seconds
 
-      if (!res.ok) {
-        if (res.status === 401) router.push('/');
-        throw new Error('Failed to fetch messages');
-      }
-
-      const data = await res.json();
-      if (Array.isArray(data)) setMessages(data);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -236,8 +238,9 @@ export default function ChatRoom() {
     }
 
     setUser({ username });
-    fetchMessages(); // ✅ Now correctly placed
+    fetchMessages();
 
+    // Connect to WebSocket
     socketRef.current = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
       path: '/api/socket',
       auth: { token },
@@ -265,7 +268,7 @@ export default function ChatRoom() {
     socketRef.current.on('error', (error) => console.error('Socket error:', error));
 
     return () => socketRef.current.disconnect();
-  }, []); // ❌ Remove fetchMessages from dependencies
+  }, [router, refreshKey]); // Depend on refreshKey to reload the component
 
   useEffect(() => {
     scrollToBottom();
@@ -277,10 +280,29 @@ export default function ChatRoom() {
     }, 100);
   };
 
+  const fetchMessages = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch('/api/messages', {
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) router.push('/');
+        throw new Error('Failed to fetch messages');
+      }
+
+      const data = await res.json();
+      if (Array.isArray(data)) setMessages(data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-  
+
     try {
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username');
@@ -314,7 +336,7 @@ export default function ChatRoom() {
   if (!user) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
+    <div key={refreshKey} className="min-h-screen flex flex-col bg-gray-100">
       <div className="bg-white shadow-md p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Chat Room</h1>
         <div className="flex items-center gap-4">
