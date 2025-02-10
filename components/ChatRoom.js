@@ -25,7 +25,7 @@ const [refreshKey, setRefreshKey] = useState(0);
   
       if (!res.ok) {
         if (res.status === 401) router.push('/');
-        throw new Error('Failed to fetch messages');
+        throw new Error('Failed to fetch messages , Report to owner');
       }
   
       const data = await res.json();
